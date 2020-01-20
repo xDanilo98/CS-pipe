@@ -25,9 +25,6 @@
 #ifndef _server_h
 #define _server_h
 
-static void* worker (void*arg);
-
-void* dispatcher(void* args);
 
 void server(int i,int servers[]);
 

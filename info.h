@@ -4,14 +4,13 @@
 #define LENNAME 108
 #define DIMHASHTABLE 1024
 #define N_LOCK 128
-#define BACKLOG 512
-#define LENOBJ 108
-#define SOCKNAME "./objstore.sock"
+
 
 typedef struct Msg{
     uint64_t id;
 	int estim;
 } msg;
+
 
 int** apipe;
 

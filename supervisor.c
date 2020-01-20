@@ -19,45 +19,69 @@
 #include<stdint.h>
 #include <time.h>
 #include <sys/time.h>
-#include<signal.h>
 #include "server.h"
 
 
 #ifndef _supervisor_c
 #define _supervisor_c
 
+int k,dimtab;
 
-int k;
+int* servers;
 
-volatile sig_atomic_t sig_counter;
+typedef struct _stima{
+    uint64_t id;
+    int stim;
+    int* numserv;
+} stima;
 
-volatile sig_atomic_t Sig;
+stima* tabstim;
 
-//handler dei segnali
-void sighandler(int sig){
-    Sig=sig;
-}
-
-static void sigalrm_handler (int signum) {
-	sig_counter=0;
-}
-
-static void sigint_handler (int signum) {
-	if (!sig_counter) {
-		sig_counter = 1;
-		alarm(1);
-
-        printf("pocco dio1\n");
-
+void printout () {
+	int i;
+	int d=0;
+	for (i=0;i<dimtab;i++) {
+		for(int j=0;j<k;j++){
+			if((tabstim[i].numserv[j])==1){
+				d++;
+			}
+		}
+		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,d);
 	}
-	else {
-		write(1,"\n",1);
+}
+
+void printerr () {
+	int i;
+	int d=0;
+	for (i=0;i<dimtab;i++) {
+		for(int j=0;j<k;j++){
+			if((tabstim[i].numserv[j])==1){
+				d++;
+			}
+		}
+		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,d);
+	}
+}
+
+volatile sig_atomic_t sig_c;
+
+void sigalarm_handler(int signum){
+	sig_c=1;
+}
+
+void sigint_handler (int signum) {
+	if (sig_c<2) {
+		sig_c = sig_c+1;
+		alarm(1);
 		
-		printf("pocco dio2\n");
-		
-		write(1, "SUPERVISOR EXITING\n", 19);
+		printerr();
+	}
+	else if(sig_c==2){		
+		printf("SUPERVISOR EXITING\n");
 		int i;
 		
+		printout();
+
 		for(i=0;i<k;i++)
 			kill(servers[i],9);
 		
@@ -65,32 +89,54 @@ static void sigint_handler (int signum) {
 	}
 }
 
-void sethandler(){
-    struct sigaction sigterm;
-    struct sigaction sigint;
-    struct sigaction sigusr1;
-    struct sigaction sigpipe;
+void insert(msg m,int serv){
+	
+	int i = 0;
+	int stim = m.estim;
+	uint64_t id = m.id;
+	int found = 0;
+	
+	while (i<dimtab && !found) {
+		if (id == tabstim[i].id) {
+			if(stim<tabstim[i].stim){
+				tabstim[i].stim=stim;
+				tabstim[i].numserv[serv]=1;
+				found=1;
+			}
+		}
+		else i++;
+	}
 
-    memset(&sigterm,0,sizeof(struct sigaction));
-    memset(&sigint,0,sizeof(struct sigaction));
-    memset(&sigusr1,0,sizeof(struct sigaction));
-    memset(&sigpipe,0,sizeof(struct sigaction));
-
-    sigpipe.sa_handler=SIG_IGN;
-    sigterm.sa_handler=sighandler;
-    sigint.sa_handler=sighandler;
-    sigusr1.sa_handler=sighandler;
-
-
-    SIG_ACTION(SIGPIPE,sigpipe);
-    SIG_ACTION(SIGINT,sigint);
-    SIG_ACTION(SIGUSR1,sigusr1);
-    SIG_ACTION(SIGTERM,sigterm);
+	if (!found) {
+		
+		tabstim[dimtab].id = id;
+		tabstim[dimtab].stim = stim;
+		tabstim[dimtab].numserv[serv]=1;
+		
+		dimtab++;
+		
+	}
 }
 
-int* servers;
-
 int main (int argc, char *argv[]) {
+
+
+	sig_c=1;
+
+	struct sigaction sint;
+	bzero(&sint, sizeof(sint));
+	sint.sa_handler = sigint_handler;
+	SIG_ACTION(SIGINT,sint);
+
+	struct sigaction salarm;
+	bzero(&salarm,sizeof(salarm));
+	salarm.sa_handler = sigalarm_handler;
+	SIG_ACTION(SIGALRM,salarm);
+
+	struct sigaction sigpipe;
+	bzero(&sigpipe,sizeof(sigpipe));
+	sigpipe.sa_handler=SIG_IGN;
+	SIG_ACTION(SIGPIPE,sigpipe);
 
     int i;
 	sscanf(argv[1],"%d",&k);
@@ -113,21 +159,29 @@ int main (int argc, char *argv[]) {
 		fcntl(apipe[i][0], F_SETFL, flags | O_NONBLOCK);
 	}
 
-    //segnali
 
-    sig_counter=0;
-
+	tabstim=malloc(1024*sizeof(stima));
+	for(int p=0;p<1024;p++){
+		tabstim[p].id=0;
+		tabstim[p].stim=0;
+		tabstim[p].numserv=malloc(k*sizeof(int));
+		memset(tabstim[p].numserv,0,k);
+	}
+	
+	dimtab=0;
 
     msg m;
 
     while (1) {
 		for (i=0;i<k;i++) {
 			if(read(apipe[i][0],&m,sizeof(msg)) == sizeof(msg)) {
-				printf("SUPERVISOR ESTIMATE %d FOR %016llX FROM %d\n", m.estim,m.id,(i+1));
-				//insert(m);
+				printf("SUPERVISOR ESTIMATE %d FOR %lui FROM %d\n", m.estim,m.id,(i+1));
+				insert(m,i);
 			}
 		}
 	}
+
+	return 0;
 }
 
 #endif
