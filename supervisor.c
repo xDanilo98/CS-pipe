@@ -88,8 +88,8 @@ void insert(msg m){
 		if (id == tabstim[i].id) {
 			if(stima<tabstim[i].stim){
 				tabstim[i].stim=stima;
-				tabstim[i].numserv++;
 			}
+			tabstim[i].numserv++;
 			found=1;
 		}
 		else i++;
@@ -163,7 +163,7 @@ int main (int argc, char *argv[]) {
 
     while (1) {
 		for (i=0;i<k;i++) {
-			if(e=read(apipe[i][0],&m,sizeof(msg)) == sizeof(msg)) {
+			if((e=(read(apipe[i][0],&m,sizeof(msg)))) == sizeof(msg)) {
 				if(e==-1){
 					fprintf(stdout,"error read\n");
 				}

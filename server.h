@@ -20,6 +20,7 @@
 #include<stdint.h>
 #include <time.h>
 #include <sys/time.h>
+#include"dispatcher.h"
 
 
 #ifndef _server_h

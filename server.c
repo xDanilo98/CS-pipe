@@ -43,7 +43,7 @@ void server(int i,int servers[]){
         struct sockaddr_un sock;
         sock.sun_family=AF_UNIX;
         char name[16] = "OOB-server-";
-        sprintf((name+11), "%d\0", (i+1));
+        sprintf((name+11), "%d", (i+1));
         strncpy(sock.sun_path,name,108);
 
         int socket_sv=0;

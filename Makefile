@@ -15,23 +15,26 @@ supervisor.o: supervisor.c $(DEPPS)
 server.o: server.c $(DEPPS)
 	$(CC) $(CFLAGS) -c -g server.c
 
-dispatcher.o: dispatcher.o $(DEPPS)
+dispatcher.o: dispatcher.c $(DEPPS)
 	$(CC) $(CFLAGS) -c -g dispatcher.c
 
 worker.o: worker.c $(DEPPS)
 	$(CC) $(CFLAGS) -c -g worker.c
 
-mainclient: client1.o
-	$(CC) -o mainclient client1.o
+mainclient: client.o
+	$(CC) -o mainclient client.o
 
-client1.o: client1.c $(DEPPS)
-	$(CC) $(CFLAGS) -c -g client1.c
-clean:
-	@rm -f main OOB-* *.o mainclient
+client1.o: client.c $(DEPPS)
+	$(CC) $(CFLAGS) -c -g client.c
+
 perm:
 	@chmod +x test.sh
+
+clean:
+	@rm -f main OOB-* *.o mainclient testout.log
+
 test:
 	make all
-	./main &
+	./main 12 &
 	./test.sh
 
