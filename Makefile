@@ -28,4 +28,10 @@ client1.o: client1.c $(DEPPS)
 	$(CC) $(CFLAGS) -c -g client1.c
 clean:
 	@rm -f main OOB-* *.o mainclient
+perm:
+	@chmod +x test.sh
+test:
+	make all
+	./main &
+	./test.sh
 

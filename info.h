@@ -14,6 +14,8 @@ typedef struct Msg{
 
 int** apipe;
 
+pthread_mutex_t lock;
+
 #define CHECKMALLOC(call) if((call)==NULL){ fprintf(stderr,"Error Malloc\n"); exit(EXIT_FAILURE);}
 
 #define CHECKREAD(call) if((call)==-1) {fprintf(stderr,"Error in read\n");}

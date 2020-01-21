@@ -9,7 +9,6 @@
 #include <string.h>
 #include <errno.h>
 #include <arpa/inet.h>
-#include <signal.h>
 #include <fcntl.h>
 #include<stdio.h>
 #include<stdlib.h>
@@ -20,6 +19,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include "server.h"
+#include<signal.h>
 
 
 #ifndef _supervisor_c
@@ -32,34 +32,22 @@ int* servers;
 typedef struct _stima{
     uint64_t id;
     int stim;
-    int* numserv;
+    int numserv;
 } stima;
 
 stima* tabstim;
 
 void printout () {
 	int i;
-	int d=0;
 	for (i=0;i<dimtab;i++) {
-		for(int j=0;j<k;j++){
-			if((tabstim[i].numserv[j])==1){
-				d++;
-			}
-		}
-		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,d);
+		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,tabstim[i].numserv);
 	}
 }
 
 void printerr () {
 	int i;
-	int d=0;
 	for (i=0;i<dimtab;i++) {
-		for(int j=0;j<k;j++){
-			if((tabstim[i].numserv[j])==1){
-				d++;
-			}
-		}
-		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,d);
+		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,tabstim[i].numserv);
 	}
 }
 
@@ -89,20 +77,20 @@ void sigint_handler (int signum) {
 	}
 }
 
-void insert(msg m,int serv){
+void insert(msg m){
 	
 	int i = 0;
-	int stim = m.estim;
+	int stima = m.estim;
 	uint64_t id = m.id;
 	int found = 0;
 	
 	while (i<dimtab && !found) {
 		if (id == tabstim[i].id) {
-			if(stim<tabstim[i].stim){
-				tabstim[i].stim=stim;
-				tabstim[i].numserv[serv]=1;
-				found=1;
+			if(stima<tabstim[i].stim){
+				tabstim[i].stim=stima;
+				tabstim[i].numserv++;
 			}
+			found=1;
 		}
 		else i++;
 	}
@@ -110,8 +98,8 @@ void insert(msg m,int serv){
 	if (!found) {
 		
 		tabstim[dimtab].id = id;
-		tabstim[dimtab].stim = stim;
-		tabstim[dimtab].numserv[serv]=1;
+		tabstim[dimtab].stim = stima;
+		tabstim[dimtab].numserv++;
 		
 		dimtab++;
 		
@@ -164,23 +152,27 @@ int main (int argc, char *argv[]) {
 	for(int p=0;p<1024;p++){
 		tabstim[p].id=0;
 		tabstim[p].stim=0;
-		tabstim[p].numserv=malloc(k*sizeof(int));
-		memset(tabstim[p].numserv,0,k);
+		tabstim[p].numserv=0;
 	}
 	
 	dimtab=0;
 
     msg m;
 
+	int e;
+
     while (1) {
 		for (i=0;i<k;i++) {
-			if(read(apipe[i][0],&m,sizeof(msg)) == sizeof(msg)) {
+			if(e=read(apipe[i][0],&m,sizeof(msg)) == sizeof(msg)) {
+				if(e==-1){
+					fprintf(stdout,"error read\n");
+				}
 				printf("SUPERVISOR ESTIMATE %d FOR %lui FROM %d\n", m.estim,m.id,(i+1));
-				insert(m,i);
+				insert(m);
 			}
 		}
 	}
-
+	
 	return 0;
 }
 
