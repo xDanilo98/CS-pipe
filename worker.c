@@ -55,8 +55,8 @@ void* worker (void*arg) {
 	
 	close(fd);
 
-	if (min>0) {
-		printf("SERVER %d CLOSING %lui ESTIMATE %d\n", (i+1), id, min);
+	if (id!=0 && min>0) {
+		printf("SERVER %d CLOSING %lu ESTIMATE %d\n", (i+1), id, min);
 		msg m = {id,min};
 		CHECKLOCK1(pthread_mutex_lock(&lock));
 		write(apipe[i][1], &m, sizeof(msg));

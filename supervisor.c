@@ -40,14 +40,14 @@ stima* tabstim;
 void printout () {
 	int i;
 	for (i=0;i<dimtab;i++) {
-		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,tabstim[i].numserv);
+		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lu BASED ON %d\n", tabstim[i].stim,tabstim[i].id,tabstim[i].numserv);
 	}
 }
 
 void printerr () {
 	int i;
 	for (i=0;i<dimtab;i++) {
-		fprintf(stdout, "SUPERVISOR ESTIMATE %d FOR %lui BASED ON %d\n", tabstim[i].stim,tabstim[i].id,tabstim[i].numserv);
+		fprintf(stderr, "SUPERVISOR ESTIMATE %d FOR %lu BASED ON %d\n", tabstim[i].stim,tabstim[i].id,tabstim[i].numserv);
 	}
 }
 
@@ -65,10 +65,12 @@ void sigint_handler (int signum) {
 		printerr();
 	}
 	else if(sig_c==2){		
-		printf("SUPERVISOR EXITING\n");
+		
 		int i;
 		
 		printout();
+
+		printf("SUPERVISOR EXITING\n");
 
 		for(i=0;i<k;i++)
 			kill(servers[i],9);
@@ -167,7 +169,7 @@ int main (int argc, char *argv[]) {
 				if(e==-1){
 					fprintf(stdout,"error read\n");
 				}
-				printf("SUPERVISOR ESTIMATE %d FOR %lui FROM %d\n", m.estim,m.id,(i+1));
+				printf("SUPERVISOR ESTIMATE %d FOR %lu FROM %d\n", m.estim,m.id,(i+1));
 				insert(m);
 			}
 		}

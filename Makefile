@@ -21,20 +21,19 @@ dispatcher.o: dispatcher.c $(DEPPS)
 worker.o: worker.c $(DEPPS)
 	$(CC) $(CFLAGS) -c -g worker.c
 
-mainclient: client.o
-	$(CC) -o mainclient client.o
+mainclient: clientfin.o
+	$(CC) -o mainclient clientfin.o
 
-client1.o: client.c $(DEPPS)
-	$(CC) $(CFLAGS) -c -g client.c
+clientfin.o: clientfin.c $(DEPPS)
+	$(CC) $(CFLAGS) -c -g clientfin.c
 
 perm:
 	@chmod +x test.sh
 
 clean:
-	@rm -f main OOB-* *.o mainclient testout.log
+	@rm -f main OOB-* *.o mainclient
 
 test:
 	make all
-	./main 12 &
 	./test.sh
 
