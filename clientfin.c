@@ -55,7 +55,7 @@ int main (int argc, char* argv[]) {
     uint64_t id=generate_id();
     uint64_t ID=htobe64(id);
 		
-	printf("CLIENT %lu SECRET %d\n", id, secret);
+	printf("CLIENT %lx SECRET %d\n", id, secret);
 	
     int* server=NULL;
     CHECKMALLOC(server=malloc(p*sizeof(int)));
@@ -101,7 +101,7 @@ int main (int argc, char* argv[]) {
         }
     }
 	
-	printf("CLIENT %lu DONE\n", id);
+	printf("CLIENT %lx DONE\n", id);
 
     i=0;
     for(i=0;i<p;i++){

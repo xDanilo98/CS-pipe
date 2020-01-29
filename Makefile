@@ -31,7 +31,7 @@ perm:
 	@chmod +x test.sh
 
 clean:
-	@rm -f main OOB-* *.o mainclient
+	@rm -f main OOB-* *.o mainclient *.log supser* form* clio*
 
 test:
 	make all
