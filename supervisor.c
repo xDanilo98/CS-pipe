@@ -29,6 +29,7 @@ int k,dimtab;
 
 int* servers;
 
+//struct per la tabella delle stime
 typedef struct _stima{
     uint64_t id;
     int stim;
@@ -37,6 +38,7 @@ typedef struct _stima{
 
 stima* tabstim;
 
+//funzione per stampare su stdout
 void printout () {
 	int i;
 	for (i=0;i<dimtab;i++) {
@@ -45,6 +47,7 @@ void printout () {
 	}
 }
 
+//funzione per stampare su stderr
 void printerr () {
 	int i;
 	for (i=0;i<dimtab;i++) {
@@ -52,12 +55,15 @@ void printerr () {
 	}
 }
 
+//variabile per i segnali
 volatile sig_atomic_t sig_c;
 
+//handler per il sigalrm
 void sigalarm_handler(int signum){
 	sig_c=1;
 }
 
+//handler per il sigint
 void sigint_handler (int signum) {
 	if (sig_c<2) {
 		sig_c = sig_c+1;
@@ -81,6 +87,7 @@ void sigint_handler (int signum) {
 	}
 }
 
+//procedura per inserire le strime arrivate dai server nella tabella delle stime
 void insert(msg m){
 	
 	int i = 0;
@@ -110,6 +117,8 @@ void insert(msg m){
 	}
 }
 
+/* Il main del supervisor: gestione segnali, creazione delle pipe e avvio dei server tramite l'invocazione della funzione "server" presente nell'omonino
+file ".c", attesa di ricezione delle stime da parte dei server*/
 int main (int argc, char *argv[]) {
 
 
@@ -132,7 +141,7 @@ int main (int argc, char *argv[]) {
 
     int i;
 	sscanf(argv[1],"%d",&k);
-	printf("SUPERVISOR STARTING %d\n", k);
+	fprintf(stdout,"SUPERVISOR STARTING %d\n", k);
 	apipe = (int **) malloc(k*sizeof(int*));
 
     for(i=0;i<k;i++) {
@@ -171,7 +180,7 @@ int main (int argc, char *argv[]) {
 				if(e==-1){
 					fprintf(stdout,"error read\n");
 				}
-				printf("SUPERVISOR ESTIMATE %d FOR %lx FROM %d\n", m.estim,m.id,(i+1));
+				fprintf(stdout,"SUPERVISOR ESTIMATE %d FOR %lx FROM %d\n", m.estim,m.id,(i+1));
 				insert(m);
 			}
 		}

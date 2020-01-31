@@ -21,11 +21,11 @@ dispatcher.o: dispatcher.c $(DEPPS)
 worker.o: worker.c $(DEPPS)
 	$(CC) $(CFLAGS) -c -g worker.c
 
-mainclient: clientfin.o
-	$(CC) -o mainclient clientfin.o
+mainclient: client.o
+	$(CC) -o mainclient client.o
 
-clientfin.o: clientfin.c $(DEPPS)
-	$(CC) $(CFLAGS) -c -g clientfin.c
+client.o: client.c $(DEPPS)
+	$(CC) $(CFLAGS) -c -g client.c
 
 perm:
 	@chmod +x test.sh

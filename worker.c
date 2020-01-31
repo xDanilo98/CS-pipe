@@ -13,19 +13,20 @@
 #include <signal.h>
 #include <fcntl.h>
 #include<stdio.h>
-#include<stdlib.h>
 #include<string.h>
 #include"info.h"
 #include<endian.h>
 #include<stdint.h>
-#include <time.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 
 
 
 #ifndef _worker_c
 #define _worker_c
 
+/* Gestisce la comunicazione tra client e server, calcola la stima e se è consistente
+la manda al supervisor*/
 void* worker (void*arg) {
 
     struct timeval t;
@@ -50,13 +51,14 @@ void* worker (void*arg) {
 				tempstima=fstim;
 			}
 		}
+		fprintf(stdout,"SERVER %d INCOMING FROM %lx@%d\n",(i+1),id,tempstima);
 		j++;
 	}
 	
 	close(fd);
 
 	if (id!=0 && min>0) {
-		printf("SERVER %d CLOSING %lx ESTIMATE %d\n", (i+1), id, min);
+		fprintf(stdout,"SERVER %d CLOSING %lx ESTIMATE %d\n", (i+1), id, min);
 		msg m = {id,min};
 		CHECKLOCK1(pthread_mutex_lock(&lock));
 		write(apipe[i][1], &m, sizeof(msg));

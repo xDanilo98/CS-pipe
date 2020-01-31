@@ -29,14 +29,16 @@
 #define _server_c
 
 
-
+/*Esegue le fork per creare il processo server distinto crea la socket e si mette in ascolto,
+viene mascherato SIGINT in caso il processo dovesse terminare tramite un ctrl-c e crea un thread dispatcher
+per accettare le connessioni */
 void server(int i,int servers[]){
 
     servers[i] = fork();
 
     if(servers[i]==0){
 
-        fprintf(stdout,"inizializzo server n:%d\n",(i+1));
+        fprintf(stdout,"SERVER %d ACTIVE\n",(i+1));
 
         pthread_t t;
 
@@ -61,7 +63,6 @@ void server(int i,int servers[]){
 
         pthread_create(&t,NULL,&dispatcher,arr);
         pthread_join(t,NULL);
-        exit(0);
     }
 
 }

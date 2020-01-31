@@ -26,7 +26,8 @@
 
 #ifndef _dispatcher_c
 #define _dispatcher_c
-
+/*Attende per accettare le connessioni dei client e in caso crea un thread worker per gestire
+la comunicazione con il client */
 void* dispatcher(void* args){
 
     int i;
@@ -44,16 +45,15 @@ void* dispatcher(void* args){
 		}
 		
 		if (cs > 0) {
-			printf("SERVER %d CONNECT FROM CLIENT\n", (i+1));
+			fprintf(stdout,"SERVER %d CONNECT FROM CLIENT\n", (i+1));
 			int arr[2];
 			arr[0] = cs;
 			arr[1] = i;
 			pthread_create(&t,NULL,&worker,arr);
+			pthread_detach(t);
 		}
 	}
-	
-	pthread_exit(NULL);
-
+	return 0;
 }
 
 #endif
